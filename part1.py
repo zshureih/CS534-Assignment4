@@ -23,12 +23,12 @@ class Node():
         Right subtree
     """
 
-    def __init__(self, prediction, feature, left_tree, right_tree):
+    def __init__(self, prediction, feature, left_tree, right_tree, gain):
         self.prediction = prediction
         self.feature = feature
         self.left_tree = left_tree
         self.right_tree = right_tree
-
+        self.gain = gain
 
 class DecisionTreeClassifier():
     """
@@ -142,10 +142,16 @@ class DecisionTreeClassifier():
             right_tree = self.build_tree(
                 best_right_X, best_right_y, depth=depth + 1)
             return Node(prediction=prediction, feature=best_feature, left_tree=left_tree,
-                        right_tree=right_tree)
+                        right_tree=right_tree, gain=best_gain)
         # if we did hit a leaf node
-        return Node(prediction=prediction, feature=best_feature, left_tree=None, right_tree=None)
+        return Node(prediction=prediction, feature=best_feature, left_tree=None, right_tree=None, gain=best_gain)
 
+def get_top_three_splits(tree, max_depth):
+    print("d_max", max_depth)
+    print("feature idx", tree.root.feature, "ig", tree.root.gain)
+    print("feature idx", tree.root.left_tree.feature, "ig", tree.root.left_tree.gain)
+    print("feature idx", tree.root.right_tree.feature, "ig", tree.root.right_tree.gain)
+    print("---------------------------")
 def decision_tree_testing(x_train, y_train, x_test, y_test):
     print('\nDecision Tree\n')
     test_accuracies = []
@@ -158,7 +164,8 @@ def decision_tree_testing(x_train, y_train, x_test, y_test):
         preds_test = clf.predict(x_test)
         training_accuracies.append(clf.accuracy_score(preds_train, y_train))
         test_accuracies.append(clf.accuracy_score(preds_test, y_test))
-
+        get_top_three_splits(clf, i)
+    
     decision_tree_results = pd.DataFrame(
         np.transpose([d_max, training_accuracies,
                       test_accuracies]),
@@ -184,7 +191,7 @@ def accuracy_score(preds, y):
 	return accuracy
 
 if __name__ == '__main__':
-    np.random.seed(212)
+    np.random.seed(1)
     x_train, y_train, x_test, y_test = load_data(os.getcwd())
     decision_tree_testing(x_train, y_train, x_test, y_test)
     print('Done')
